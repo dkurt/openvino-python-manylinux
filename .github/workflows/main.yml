@@ -16,6 +16,11 @@ jobs:
     - name: Copy binaries
       run: docker run -v $(pwd):/mnt manylinux sh -c "cp /wheels/* /mnt"
 
+    - uses: actions/upload-artifact@v2
+      with:
+        name: wheels
+        path: "*.whl"
+
     - name: Publish test packages
       env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -57,9 +62,20 @@ jobs:
 
 
   publish:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    # if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     needs: [test_ubuntu18, test_debian10, test_ubuntu20]
     runs-on: ubuntu-18.04
     steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: wheels
+
       - name: Publish
-        run: echo "Hello!"
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          tar -xf wheels.tar.gz
+          ls
+          ls wheels
+          python3 -m twine upload wheels/*.whl
