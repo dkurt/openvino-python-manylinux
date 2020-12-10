@@ -9,10 +9,10 @@ if not 'VERSION' in os.environ:
 py_version = '{}.{}'.format(sys.version_info[0], sys.version_info[1])
 
 extension_module = Extension(
-        'experimental-openvino-python.extension',
-        sources=[],
-        library_dirs=['/openvino/bin/intel64/Release/lib/'],
-        libraries=['inference_engine'],
+    'experimental-openvino-python.extension',
+    sources=[],
+    library_dirs=['/openvino/bin/intel64/Release/lib/'],
+    libraries=['inference_engine'],
 )
 
 setup(name='experimental-openvino-python',
@@ -26,6 +26,13 @@ setup(name='experimental-openvino-python',
           'openvino': [
               '/openvino/bin/intel64/Release/lib/python_api/python{}/openvino/inference_engine/ie_api.so'.format(py_version),
               '/openvino/bin/intel64/Release/lib/python_api/python{}/openvino/inference_engine/constants.so'.format(py_version),
-          ]
+          ],
       },
+      data_files=[('../../experimental_openvino_python.libs', [
+        '/openvino/bin/intel64/Release/lib/plugins.xml',
+        '/openvino/bin/intel64/Release/lib/libinference_engine_ir_reader.so',
+        '/openvino/bin/intel64/Release/lib/libHeteroPlugin.so',
+        '/openvino/bin/intel64/Release/lib/libMKLDNNPlugin.so',
+      ])],
+      install_requires=['numpy'],
 )

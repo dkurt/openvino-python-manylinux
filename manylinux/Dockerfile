@@ -32,7 +32,7 @@ RUN cd openvino/build && \
         cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
             -DENABLE_VPU=OFF \
-            -DENABLE_MKL_DNN=OFF \
+            -DENABLE_MKL_DNN=ON \
             -DENABLE_CLDNN=OFF \
             -DENABLE_SAMPLES=OFF \
             -DENABLE_OPENCV=OFF \
@@ -47,9 +47,12 @@ RUN cd openvino/build && \
 
 RUN export VERSION=0.0.1 && \
     export LD_LIBRARY_PATH=/openvino/bin/intel64/Release/lib/:$LD_LIBRARY_PATH && \
+    mkdir /wheels && \
     for ver in cp35-cp35m cp38-cp38; do \
-        /opt/python/${ver}/bin/python setup.py build bdist_wheel; \
+        mkdir /wheel_${ver} && cd /wheel_${ver}; \
+        /opt/python/${ver}/bin/python /setup.py build bdist_wheel; \
         auditwheel repair dist/experimental_openvino_python-${VERSION}-${ver}-linux_x86_64.whl; \
+        cp wheelhouse/experimental_openvino_python-${VERSION}-${ver}-manylinux2014_x86_64.whl /wheels; \
         /opt/python/${ver}/bin/python -m pip install wheelhouse/experimental_openvino_python-${VERSION}-${ver}-manylinux2014_x86_64.whl; \
         /opt/python/${ver}/bin/python -c "from openvino.inference_engine import IECore; ie = IECore()"; \
     done
