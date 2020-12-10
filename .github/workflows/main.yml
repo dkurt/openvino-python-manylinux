@@ -25,7 +25,9 @@ jobs:
       env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: python3 -m twine upload --repository testpypi *.whl
+      run: |
+        python3 -m pip install twine
+        python3 -m twine upload --repository testpypi *.whl
 
   test_ubuntu18:
     needs: build
@@ -78,4 +80,5 @@ jobs:
           tar -xf wheels.tar.gz
           ls
           ls wheels
+          python3 -m pip install twine
           python3 -m twine upload wheels/*.whl
