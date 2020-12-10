@@ -32,7 +32,7 @@ setup(name='experimental-openvino-python',
         '/openvino/bin/intel64/Release/lib/plugins.xml',
         '/openvino/bin/intel64/Release/lib/libinference_engine_ir_reader.so',
         '/openvino/bin/intel64/Release/lib/libHeteroPlugin.so',
-        '/openvino/bin/intel64/Release/lib/libMKLDNNPlugin.so',
+        # '/openvino/bin/intel64/Release/lib/libMKLDNNPlugin.so',
       ])],
       install_requires=['numpy'],
 )

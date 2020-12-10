@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     env:
-      VERSION: 0.0.3
+      VERSION: 0.0.4
     steps:
     - uses: actions/checkout@v2
 
@@ -34,7 +34,9 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Install
-        run: python3.6 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
+        run: |
+          python3.6 -m pip install --upgrade pip
+          python3.6 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
 
       - name: Test
         run: python3.6 -c "from openvino.inference_engine import IECore; ie = IECore()"
@@ -46,7 +48,9 @@ jobs:
       image: docker://debian:10
     steps:
       - name: Install
-        run: python3.7 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
+        run: |
+          python3.7 -m pip install --upgrade pip
+          python3.7 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
 
       - name: Test
         run: python3.7 -c "from openvino.inference_engine import IECore; ie = IECore()"
@@ -57,7 +61,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Install
-        run: python3.8 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
+        run: |
+          python3.8 -m pip install --upgrade pip
+          python3.8 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
 
       - name: Test
         run: python3.8 -c "from openvino.inference_engine import IECore; ie = IECore()"
