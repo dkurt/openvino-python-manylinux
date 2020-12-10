@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     env:
-      VERSION: 0.0.7
+      VERSION: 2021.2
     steps:
     - uses: actions/checkout@v2
 
@@ -21,24 +21,21 @@ jobs:
         name: wheels
         path: "*.whl"
 
-    - name: Publish test packages
-      env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        python3 -m pip install twine
-        python3 -m twine upload --repository testpypi *.whl
 
   test_ubuntu18:
     needs: build
     runs-on: ubuntu-18.04
     steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: wheels
+
       - name: Install
         run: |
-          apt-get update
-          apt-get install -y python3-numpy
+          sudo apt-get update
+          sudo apt-get install -y python3-numpy
           python3.6 -m pip install --upgrade pip
-          python3.6 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
+          python3.6 -m pip install *-cp36-cp36m-manylinux2014_x86_64.whl
 
       - name: Test
         run: python3.6 -c "from openvino.inference_engine import IECore; ie = IECore()"
@@ -49,12 +46,16 @@ jobs:
     container:
       image: docker://debian:10
     steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: wheels
+
       - name: Install
         run: |
           apt-get update
           apt-get install -y python3 python3-pip python3-numpy
           python3.7 -m pip install --upgrade pip
-          python3.7 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
+          python3.7 -m pip install *-cp37-cp37m-manylinux2014_x86_64.whl
 
       - name: Test
         run: python3.7 -c "from openvino.inference_engine import IECore; ie = IECore()"
@@ -64,19 +65,23 @@ jobs:
     needs: build
     runs-on: ubuntu-20.04
     steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: wheels
+
       - name: Install
         run: |
-          apt-get update
-          apt-get install -y python3-numpy
+          sudo apt-get update
+          sudo apt-get install -y python3-numpy
           python3.8 -m pip install --upgrade pip
-          python3.8 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
+          python3.8 -m pip install *-cp38-cp38-manylinux2014_x86_64.whl
 
       - name: Test
         run: python3.8 -c "from openvino.inference_engine import IECore; ie = IECore()"
 
 
   publish:
-    # if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     needs: [test_ubuntu18, test_debian10, test_ubuntu20]
     runs-on: ubuntu-18.04
     steps:
@@ -89,8 +94,5 @@ jobs:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          tar -xf wheels.tar.gz
-          ls
-          ls wheels
           python3 -m pip install twine
-          python3 -m twine upload wheels/*.whl
+          python3 -m twine upload *.whl
