@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     env:
-      VERSION: 0.0.1
+      VERSION: 0.0.2
     steps:
     - uses: actions/checkout@v2
 
@@ -16,78 +16,49 @@ jobs:
     - name: Copy binaries
       run: docker run -v $(pwd):/mnt manylinux sh -c "cp /wheels/* /mnt"
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: experimental_openvino_python-${VERSION}-cp35-cp35m-manylinux2014_x86_64.whl
-        path: experimental_openvino_python-${VERSION}-cp35-cp35m-manylinux2014_x86_64.whl
-
-    - uses: actions/upload-artifact@v2
-      with:
-        name: experimental_openvino_python-${VERSION}-cp36-cp36m-manylinux2014_x86_64.whl
-        path: experimental_openvino_python-${VERSION}-cp36-cp36m-manylinux2014_x86_64.whl
-
-    - uses: actions/upload-artifact@v2
-      with:
-        name: experimental_openvino_python-${VERSION}-cp37-cp37m-manylinux2014_x86_64.whl
-        path: experimental_openvino_python-${VERSION}-cp37-cp37m-manylinux2014_x86_64.whl
-
-    - uses: actions/upload-artifact@v2
-      with:
-        name: experimental_openvino_python-${VERSION}-cp38-cp38-manylinux2014_x86_64.whl
-        path: experimental_openvino_python-${VERSION}-cp38-cp38-manylinux2014_x86_64.whl
-
-    - uses: actions/upload-artifact@v2
-      with:
-        name: experimental_openvino_python-${VERSION}-cp39-cp39-manylinux2014_x86_64.whl
-        path: experimental_openvino_python-${VERSION}-cp39-cp39-manylinux2014_x86_64.whl
+    - name: Publish test packages
+      env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: python3 -m twine upload --repository testpypi *.whl
 
   test_ubuntu18:
     needs: build
     runs-on: ubuntu-18.04
-    env:
-      PY_VER: cp36-cp36m
     steps:
-      - name: Download wheel
-        uses: actions/download-artifact@v2
-        with:
-          name: experimental_openvino_python-${VERSION}-${PY_VER}-manylinux2014_x86_64.whl
-
-      - name: Install wheel
-        run: |
-          tar -xf experimental_openvino_python-${VERSION}-${PY_VER}-manylinux2014_x86_64.whl.tar.gz
-          ls
-          python3 -m pip install experimental_openvino_python-${VERSION}-${PY_VER}-manylinux2014_x86_64.whl
+      - name: Install
+        run: python3.6 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
 
       - name: Test
-        run: |
-          python3 -c "from openvino.inference_engine import IECore; ie = IECore()"
+        run: python3.6 -c "from openvino.inference_engine import IECore; ie = IECore()"
+
+  test_debian10:
+    needs: build
+    runs-on: ubuntu-18.04
+    container:
+      image: docker://debian:10
+    steps:
+      - name: Install
+        run: python3.7 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
+
+      - name: Test
+        run: python3.7 -c "from openvino.inference_engine import IECore; ie = IECore()"
 
 
   test_ubuntu20:
     needs: build
     runs-on: ubuntu-20.04
-    env:
-      PY_VER: cp38-cp38
     steps:
-      - name: Download wheel
-        uses: actions/download-artifact@v2
-        with:
-          name: experimental_openvino_python-${VERSION}-${PY_VER}-manylinux2014_x86_64.whl
-
-      - name: Install wheel
-        run: |
-          tar -xf experimental_openvino_python-${VERSION}-${PY_VER}-manylinux2014_x86_64.whl.tar.gz
-          ls
-          python3 -m pip install experimental_openvino_python-${VERSION}-${PY_VER}-manylinux2014_x86_64.whl
+      - name: Install
+        run: python3.8 -m pip install -i https://test.pypi.org/simple/ experimental-openvino-python
 
       - name: Test
-        run: |
-          python3 -c "from openvino.inference_engine import IECore; ie = IECore()"
+        run: python3.8 -c "from openvino.inference_engine import IECore; ie = IECore()"
 
 
   publish:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    needs: [test_ubuntu18, test_ubuntu20]
+    needs: [test_ubuntu18, test_debian10, test_ubuntu20]
     runs-on: ubuntu-18.04
     steps:
       - name: Publish

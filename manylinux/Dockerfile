@@ -5,13 +5,13 @@ ARG VERSION
 ENV VERSION=$VERSION
 
 # Install Cython
-RUN for ver in cp35-cp35m cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39; do \
+RUN for ver in cp36-cp36m cp37-cp37m cp38-cp38; do \
         /opt/python/${ver}/bin/python -m pip install cython; \
     done
 
 # Build libpython3.x.so
 RUN yum install -y zlib-devel && \
-    for ver in cp35-cp35m cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39; do \
+    for ver in cp36-cp36m cp37-cp37m cp38-cp38; do \
         full_ver=$(/opt/python/${ver}/bin/python -c "import platform; print(platform.python_version())"); \
         curl https://www.python.org/ftp/python/${full_ver}/Python-${full_ver}.tgz -o Python-${full_ver}.tgz; \
         tar -xf Python-${full_ver}.tgz && cd Python-${full_ver}; \
@@ -26,7 +26,7 @@ RUN git clone --depth 1 -b releases/2021/2 https://github.com/openvinotoolkit/op
     mkdir build
     
 RUN cd openvino/build && \
-    for ver in cp35-cp35m cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39; do \
+    for ver in cp36-cp36m cp37-cp37m cp38-cp38; do \
         full_ver=$(/opt/python/${ver}/bin/python -c "import platform; print(platform.python_version())"); \
         minor_ver=${ver:8}; \
         cmake .. \
@@ -47,7 +47,7 @@ RUN cd openvino/build && \
 
 RUN export LD_LIBRARY_PATH=/openvino/bin/intel64/Release/lib/:$LD_LIBRARY_PATH && \
     mkdir /wheels && \
-    for ver in cp35-cp35m cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39; do \
+    for ver in cp36-cp36m cp37-cp37m cp38-cp38; do \
         mkdir /wheel_${ver} && cd /wheel_${ver}; \
         /opt/python/${ver}/bin/python /setup.py build bdist_wheel; \
         auditwheel repair dist/experimental_openvino_python-${VERSION}-${ver}-linux_x86_64.whl; \
