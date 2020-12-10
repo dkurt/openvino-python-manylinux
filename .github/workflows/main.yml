@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     env:
-      VERSION: 0.0.2
+      VERSION: 0.0.3
     steps:
     - uses: actions/checkout@v2
 

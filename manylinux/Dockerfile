@@ -41,16 +41,16 @@ RUN cd openvino/build && \
         make -j$(nproc); \
     done
 
+ARG VERSION
+ENV VERSION=$VERSION
+
 ADD setup.py /
 
-RUN export VERSION=0.0.1 && \
-    export LD_LIBRARY_PATH=/openvino/bin/intel64/Release/lib/:$LD_LIBRARY_PATH && \
+RUN export LD_LIBRARY_PATH=/openvino/bin/intel64/Release/lib/:$LD_LIBRARY_PATH && \
     mkdir /wheels && \
     for ver in cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39; do \
         mkdir /wheel_${ver} && cd /wheel_${ver}; \
         /opt/python/${ver}/bin/python /setup.py build bdist_wheel; \
         auditwheel repair dist/experimental_openvino_python-${VERSION}-${ver}-linux_x86_64.whl; \
         cp wheelhouse/experimental_openvino_python-${VERSION}-${ver}-manylinux2014_x86_64.whl /wheels; \
-        /opt/python/${ver}/bin/python -m pip install wheelhouse/experimental_openvino_python-${VERSION}-${ver}-manylinux2014_x86_64.whl; \
-        /opt/python/${ver}/bin/python -c "from openvino.inference_engine import IECore; ie = IECore()"; \
     done
