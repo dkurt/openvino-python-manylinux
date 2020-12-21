@@ -1,5 +1,7 @@
 FROM quay.io/pypa/manylinux2014_x86_64
 
+ARG VERSION
+
 # Install Cython
 RUN for ver in cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39; do \
         /opt/python/${ver}/bin/python -m pip install cython; \
@@ -16,7 +18,7 @@ RUN yum install -y zlib-devel && \
         cd /; \
     done
 
-RUN git clone --depth 1 -b 2021.2 https://github.com/openvinotoolkit/openvino/ && \
+RUN git clone --depth 1 -b OPENVINO_BRANCH https://github.com/openvinotoolkit/openvino/ && \
     cd openvino && \
     git submodule update --init --recursive && \
     mkdir build
@@ -40,12 +42,12 @@ RUN cd openvino/build && \
         make -j$(nproc); \
     done
 
-ARG VERSION
 ENV VERSION=$VERSION
 
 ADD setup.py /
 
 RUN export LD_LIBRARY_PATH=/openvino/bin/intel64/Release/lib/:$LD_LIBRARY_PATH && \
+    export OPENVINO_LIBS_DIR=/openvino/bin/intel64/Release/lib && \
     mkdir /wheels && \
     for ver in cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39; do \
         mkdir /wheel_${ver} && cd /wheel_${ver}; \

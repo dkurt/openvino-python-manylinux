@@ -15,8 +15,7 @@ jobs:
 
     # - name: Build
     #   run: |
-    #     cp setup.py manylinux
-    #     docker build -t manylinux manylinux --build-arg VERSION=${{env.VERSION}}
+    #     docker build -t manylinux manylinux --build-arg VERSION=${{env.VERSION}} --build-arg OPENVINO_BRANCH=${{env.OPENVINO_BRANCH}}
 
   #   - name: Copy binaries
   #     run: docker run -v $(pwd):/mnt manylinux sh -c "cp /wheels/* /mnt"
@@ -47,13 +46,11 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Build
+    - name: Build OpenVINO
       run: |
         cd openvino/build
 
         "${{env.pythonLocation}}\python.exe" -m pip install cython
-
-        dir "${{env.pythonLocation}}\libs"
 
         cmake ^
           -DENABLE_VPU=OFF ^
@@ -69,6 +66,14 @@ jobs:
 
         cmake --build . --config Release -j 2
       shell: cmd
+
+    - name: Build wheel
+      run: |
+        set OPENVINO_LIBS_DIR="%CD%\openvino\bin\intel64\Release"
+        dir "%OPENVINO_LIBS_DIR%"
+        "${{env.pythonLocation}}\python.exe" manylinux\setup.py build bdist_wheel
+      shell: cmd
+
 
     # - name: Copy binaries
     #   run: docker run -v $(pwd):/mnt manylinux sh -c "cp /wheels/* /mnt"
