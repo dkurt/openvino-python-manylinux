@@ -16,7 +16,7 @@ RUN yum install -y zlib-devel && \
         cd /; \
     done
 
-RUN git clone --depth 1 -b releases/2021/2 https://github.com/openvinotoolkit/openvino/ && \
+RUN git clone --depth 1 -b 2021.2 https://github.com/openvinotoolkit/openvino/ && \
     cd openvino && \
     git submodule update --init --recursive && \
     mkdir build
