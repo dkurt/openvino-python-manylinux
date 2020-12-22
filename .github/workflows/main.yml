@@ -64,8 +64,6 @@ jobs:
           -DENABLE_CPPLINT=OFF ^
           -DENABLE_PYTHON=ON ^
           -DPYTHON_EXECUTABLE="${{env.pythonLocation}}\python.exe" ^
-          -DPYTHON_INCLUDE_DIR="${{env.pythonLocation}}\include" ^
-          -DPYTHON_LIBRARY="${{env.pythonLocation}}\libs\python37.lib" ^
           -G "Visual Studio 16 2019" -A x64 ..
 
         cmake --build . --config Release -j 2
@@ -80,7 +78,7 @@ jobs:
 
     - name: Test
       run: |
-        "${{env.pythonLocation}}\python.exe" -m pip install dist\experimental_openvino_python-${{env.VERSION}}-cp37-cp37m-win_amd64.whl
+        "${{env.pythonLocation}}\python.exe" -m pip install --no-index --find-links dist experimental-openvino-python
         "${{env.pythonLocation}}\python.exe" test.py
       shell: cmd
 

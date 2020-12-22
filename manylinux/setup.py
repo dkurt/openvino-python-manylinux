@@ -39,20 +39,22 @@ data = [ libs_dir + '/' + normalize_lib_name(name) for name in [
     # 'MKLDNNPlugin',
 ]]
 
+data += [libs_dir + '/plugins.xml']
+
 # Add TBB shared library
 if sys.platform == 'win32':
     data += [os.environ['TBB_DIR'] + '/../bin/tbb.dll']
-    libs_dst = '../../openvino/inference_engine'
+    data = [('../../openvino/inference_engine', data)]
 elif sys.platform == 'linux':
     data += [os.environ['TBB_DIR'] + '/../lib/libtbb.so']
-    data += [libs_dir + '/python_api/python{}/openvino/inference_engine/ie_api.so'.format(py_version)]
-    data += [libs_dir + '/python_api/python{}/openvino/inference_engine/constants.so'.format(py_version)]
-    libs_dst = '../../experimental_openvino_python.libs'
+    data = [('../../experimental_openvino_python.libs', data),
+            ('../../openvino/inference_engine', [
+                libs_dir + '/python_api/python{}/openvino/inference_engine/ie_api.so'.format(py_version),
+                libs_dir + '/python_api/python{}/openvino/inference_engine/constants.so'.format(py_version),
+            ])]
 else:
     raise Exception('Unknown platform: ' + sys.platform)
 
-# Add other files
-data += [libs_dir + '/plugins.xml']
 
 setup(name='experimental-openvino-python',
       version=os.environ['VERSION'],
@@ -61,6 +63,6 @@ setup(name='experimental-openvino-python',
       distclass=BinaryDistribution,
       packages=['openvino', 'openvino.inference_engine'],
       package_dir={'openvino': libs_dir + '/python_api/python{}/openvino'.format(py_version)},
-      data_files=[(libs_dst, data)],
+      data_files=data,
       install_requires=['numpy'],
 )
