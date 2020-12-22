@@ -7,23 +7,23 @@ env:
   VERSION: 2021.2.1
 
 jobs:
-  # build_lnx:
-  #   name: Build (Linux)
-  #   runs-on: ubuntu-18.04
-  #   steps:
-  #   - uses: actions/checkout@v2
+  build_lnx:
+    name: Build (Linux)
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
 
-    # - name: Build
-    #   run: |
-    #     docker build -t manylinux manylinux --build-arg VERSION=${{env.VERSION}} --build-arg OPENVINO_BRANCH=${{env.OPENVINO_BRANCH}}
+    - name: Build
+      run: |
+        docker build -t manylinux manylinux --build-arg VERSION=${{env.VERSION}} --build-arg OPENVINO_BRANCH=${{env.OPENVINO_BRANCH}}
 
-  #   - name: Copy binaries
-  #     run: docker run -v $(pwd):/mnt manylinux sh -c "cp /wheels/* /mnt"
+    - name: Copy binaries
+      run: docker run -v $(pwd):/mnt manylinux sh -c "cp /wheels/* /mnt"
 
-  #   - uses: actions/upload-artifact@v2
-  #     with:
-  #       name: wheels
-  #       path: "*.whl"
+    - uses: actions/upload-artifact@v2
+      with:
+        name: wheels
+        path: "*.whl"
 
   build_win:
     name: Build (Windows)
@@ -50,7 +50,7 @@ jobs:
       run: |
         cd openvino/build
 
-        "${{env.pythonLocation}}\python.exe" -m pip install cython
+        "${{env.pythonLocation}}\python.exe" -m pip install cython wheel
 
         cmake ^
           -DENABLE_VPU=OFF ^
@@ -84,23 +84,23 @@ jobs:
     #     path: "*.whl"
 
 
-  # test_ubuntu18:
-  #   needs: build_lnx
-  #   runs-on: ubuntu-18.04
-  #   steps:
-  #     - uses: actions/download-artifact@v2
-  #       with:
-  #         name: wheels
+  test_ubuntu18:
+    needs: build_lnx
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: wheels
 
-  #     - name: Install
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install -y python3-numpy
-  #         python3.6 -m pip install --upgrade pip
-  #         python3.6 -m pip install *-cp36-cp36m-manylinux2014_x86_64.whl
+      - name: Install
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-numpy
+          python3.6 -m pip install --upgrade pip
+          python3.6 -m pip install *-cp36-cp36m-manylinux2014_x86_64.whl
 
-  #     - name: Test
-  #       run: python3.6 -c "from openvino.inference_engine import IECore; ie = IECore()"
+      - name: Test
+        run: python3.6 -c "from openvino.inference_engine import IECore; ie = IECore()"
 
   # test_debian10:
   #   needs: build_lnx

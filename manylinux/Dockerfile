@@ -48,6 +48,7 @@ ADD setup.py /
 
 RUN export LD_LIBRARY_PATH=/openvino/bin/intel64/Release/lib/:$LD_LIBRARY_PATH && \
     export OPENVINO_LIBS_DIR=/openvino/bin/intel64/Release/lib && \
+    export TBB_DIR=/openvino/inference-engine/temp/tbb/cmake/ && \
     mkdir /wheels && \
     for ver in cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39; do \
         mkdir /wheel_${ver} && cd /wheel_${ver}; \
