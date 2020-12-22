@@ -54,6 +54,7 @@ jobs:
 
         cmake ^
           -DENABLE_VPU=OFF ^
+          -DENABLE_MKL_DNN=OFF ^
           -DENABLE_CLDNN=OFF ^
           -DENABLE_SAMPLES=OFF ^
           -DENABLE_OPENCV=OFF ^
@@ -70,13 +71,16 @@ jobs:
     - name: Build wheel
       run: |
         set OPENVINO_LIBS_DIR="%CD%\openvino\bin\intel64\Release"
+        set TBB_DIR="%CD%\openvino\inference-engine\temp\tbb\cmake"
         dir "%OPENVINO_LIBS_DIR%"
         "${{env.pythonLocation}}\python.exe" manylinux\setup.py build bdist_wheel
       shell: cmd
 
-
-    # - name: Copy binaries
-    #   run: docker run -v $(pwd):/mnt manylinux sh -c "cp /wheels/* /mnt"
+    - name: Test
+      run: |
+        "${{env.pythonLocation}}\python.exe" -m pip install dist\experimental_openvino_python-${{env.VERSION}}-cp37-cp37m-win_amd64.whl
+        "${{env.pythonLocation}}\python.exe" test.py
+      shell: cmd
 
     # - uses: actions/upload-artifact@v2
     #   with:
@@ -88,6 +92,8 @@ jobs:
     needs: build_lnx
     runs-on: ubuntu-18.04
     steps:
+      - uses: actions/checkout@v2
+
       - uses: actions/download-artifact@v2
         with:
           name: wheels
@@ -100,7 +106,7 @@ jobs:
           python3.6 -m pip install *-cp36-cp36m-manylinux2014_x86_64.whl
 
       - name: Test
-        run: python3.6 -c "from openvino.inference_engine import IECore; ie = IECore()"
+        run: python3.6 test.py
 
   # test_debian10:
   #   needs: build_lnx
@@ -120,7 +126,7 @@ jobs:
   #         python3.7 -m pip install *-cp37-cp37m-manylinux2014_x86_64.whl
 
   #     - name: Test
-  #       run: python3.7 -c "from openvino.inference_engine import IECore; ie = IECore()"
+  #       run: python3.7 test.py
 
   # test_ubuntu20:
   #   needs: build_lnx
@@ -138,7 +144,7 @@ jobs:
   #         python3.8 -m pip install *-cp38-cp38-manylinux2014_x86_64.whl
 
   #     - name: Test
-  #       run: python3.8 -c "from openvino.inference_engine import IECore; ie = IECore()"
+  #       run: python3.8 test.py
 
 
   # publish:

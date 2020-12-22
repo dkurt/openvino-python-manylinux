@@ -1,6 +1,7 @@
 FROM quay.io/pypa/manylinux2014_x86_64
 
 ARG VERSION
+ARG OPENVINO_BRANCH
 
 # Install Cython
 RUN for ver in cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39; do \
@@ -18,7 +19,7 @@ RUN yum install -y zlib-devel && \
         cd /; \
     done
 
-RUN git clone --depth 1 -b OPENVINO_BRANCH https://github.com/openvinotoolkit/openvino/ && \
+RUN git clone --depth 1 -b ${OPENVINO_BRANCH} https://github.com/openvinotoolkit/openvino/ && \
     cd openvino && \
     git submodule update --init --recursive && \
     mkdir build
@@ -30,6 +31,7 @@ RUN cd openvino/build && \
         cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
             -DENABLE_VPU=OFF \
+            -DENABLE_MKL_DNN=OFF \
             -DENABLE_CLDNN=OFF \
             -DENABLE_SAMPLES=OFF \
             -DENABLE_OPENCV=OFF \
