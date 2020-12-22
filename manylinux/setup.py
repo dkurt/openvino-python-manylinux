@@ -7,9 +7,9 @@ from setuptools.dist import Distribution
 if not 'VERSION' in os.environ:
     raise Exception('Script usage: VERSION=x.x.x python3 setup.py sdist')
 if not 'OPENVINO_LIBS_DIR' in os.environ:
-    raise Exception('Speify OPENVINO_LIBS_DIR to OpenVINO binaries folder')
+    raise Exception('Specify OPENVINO_LIBS_DIR to OpenVINO binaries folder')
 if not 'TBB_DIR' in os.environ:
-    raise Exception('Speify TBB_DIR to TBBConfig.cmake folder')
+    raise Exception('Specify TBB_DIR to TBBConfig.cmake folder')
 
 libs_dir = os.environ['OPENVINO_LIBS_DIR']
 py_version = '{}.{}'.format(sys.version_info[0], sys.version_info[1])

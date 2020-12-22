@@ -1,6 +1,9 @@
 name: CI
 
-on: [push]
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 env:
   OPENVINO_BRANCH: 2021.2
@@ -30,7 +33,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: [3.7]
+        python-version: [3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
 
@@ -70,9 +73,8 @@ jobs:
 
     - name: Build wheel
       run: |
-        set OPENVINO_LIBS_DIR="%CD%\openvino\bin\intel64\Release"
-        set TBB_DIR="%CD%\openvino\inference-engine\temp\tbb\cmake"
-        dir "%OPENVINO_LIBS_DIR%"
+        set OPENVINO_LIBS_DIR=%CD%\openvino\bin\intel64\Release
+        set TBB_DIR=%CD%\openvino\inference-engine\temp\tbb\cmake
         "${{env.pythonLocation}}\python.exe" manylinux\setup.py build bdist_wheel
       shell: cmd
 
@@ -82,10 +84,10 @@ jobs:
         "${{env.pythonLocation}}\python.exe" test.py
       shell: cmd
 
-    # - uses: actions/upload-artifact@v2
-    #   with:
-    #     name: wheels
-    #     path: "*.whl"
+    - uses: actions/upload-artifact@v2
+      with:
+        name: "wheel_win_${{ matrix.python-version }}"
+        path: "dist\\*.whl"
 
 
   test_ubuntu18:
@@ -153,8 +155,6 @@ jobs:
   #   runs-on: ubuntu-18.04
   #   steps:
   #     - uses: actions/download-artifact@v2
-  #       with:
-  #         name: wheels
 
   #     - name: Publish
   #       env:
