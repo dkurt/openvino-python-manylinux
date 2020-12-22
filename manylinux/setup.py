@@ -36,7 +36,7 @@ data = [ libs_dir + '/' + normalize_lib_name(name) for name in [
     'ngraph',
     'inference_engine_onnx_reader',
     'inference_engine_preproc',
-    # 'MKLDNNPlugin',
+    'MKLDNNPlugin',
 ]]
 
 data += [libs_dir + '/plugins.xml']

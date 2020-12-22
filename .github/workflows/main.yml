@@ -33,7 +33,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
 
@@ -57,7 +57,6 @@ jobs:
 
         cmake ^
           -DENABLE_VPU=OFF ^
-          -DENABLE_MKL_DNN=OFF ^
           -DENABLE_CLDNN=OFF ^
           -DENABLE_SAMPLES=OFF ^
           -DENABLE_OPENCV=OFF ^
@@ -78,6 +77,7 @@ jobs:
 
     - name: Test
       run: |
+        "${{env.pythonLocation}}\python.exe" -m pip install numpy
         "${{env.pythonLocation}}\python.exe" -m pip install --no-index --find-links dist experimental-openvino-python
         "${{env.pythonLocation}}\python.exe" test.py
       shell: cmd
@@ -108,56 +108,60 @@ jobs:
       - name: Test
         run: python3.6 test.py
 
-  # test_debian10:
-  #   needs: build_lnx
-  #   runs-on: ubuntu-18.04
-  #   container:
-  #     image: docker://debian:10
-  #   steps:
-  #     - uses: actions/download-artifact@v2
-  #       with:
-  #         name: wheels
+  test_debian10:
+    needs: build_lnx
+    runs-on: ubuntu-18.04
+    container:
+      image: docker://debian:10
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Install
-  #       run: |
-  #         apt-get update
-  #         apt-get install -y python3 python3-pip python3-numpy
-  #         python3.7 -m pip install --upgrade pip
-  #         python3.7 -m pip install *-cp37-cp37m-manylinux2014_x86_64.whl
+      - uses: actions/download-artifact@v2
+        with:
+          name: wheels
 
-  #     - name: Test
-  #       run: python3.7 test.py
+      - name: Install
+        run: |
+          apt-get update
+          apt-get install -y python3 python3-pip python3-numpy
+          python3.7 -m pip install --upgrade pip
+          python3.7 -m pip install *-cp37-cp37m-manylinux2014_x86_64.whl
 
-  # test_ubuntu20:
-  #   needs: build_lnx
-  #   runs-on: ubuntu-20.04
-  #   steps:
-  #     - uses: actions/download-artifact@v2
-  #       with:
-  #         name: wheels
+      - name: Test
+        run: python3.7 test.py
 
-  #     - name: Install
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install -y python3-numpy
-  #         python3.8 -m pip install --upgrade pip
-  #         python3.8 -m pip install *-cp38-cp38-manylinux2014_x86_64.whl
+  test_ubuntu20:
+    needs: build_lnx
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Test
-  #       run: python3.8 test.py
+      - uses: actions/download-artifact@v2
+        with:
+          name: wheels
+
+      - name: Install
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-numpy
+          python3.8 -m pip install --upgrade pip
+          python3.8 -m pip install *-cp38-cp38-manylinux2014_x86_64.whl
+
+      - name: Test
+        run: python3.8 test.py
 
 
-  # publish:
-  #   if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-  #   needs: [test_ubuntu18, test_debian10, test_ubuntu20]
-  #   runs-on: ubuntu-18.04
-  #   steps:
-  #     - uses: actions/download-artifact@v2
+  publish:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: [test_ubuntu18, test_debian10, test_ubuntu20, build_win]
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/download-artifact@v2
 
-  #     - name: Publish
-  #       env:
-  #         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-  #         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-  #       run: |
-  #         python3 -m pip install twine
-  #         python3 -m twine upload *.whl
+      - name: Publish
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          python3 -m pip install twine
+          python3 -m twine upload *.whl

@@ -31,7 +31,6 @@ RUN cd openvino/build && \
         cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
             -DENABLE_VPU=OFF \
-            -DENABLE_MKL_DNN=OFF \
             -DENABLE_CLDNN=OFF \
             -DENABLE_SAMPLES=OFF \
             -DENABLE_OPENCV=OFF \
