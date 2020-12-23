@@ -44,6 +44,10 @@ data += [libs_dir + '/plugins.xml']
 # Add TBB shared library
 if sys.platform == 'win32':
     data += [os.environ['TBB_DIR'] + '/../bin/tbb.dll']
+    data += [
+        libs_dir + '/python_api/python{}/openvino/inference_engine/ie_api.pyd'.format(py_version),
+        libs_dir + '/python_api/python{}/openvino/inference_engine/constants.pyd'.format(py_version),
+    ]
     data = [('../../openvino/inference_engine', data)]
 elif sys.platform == 'linux':
     data += [os.environ['TBB_DIR'] + '/../lib/libtbb.so']
