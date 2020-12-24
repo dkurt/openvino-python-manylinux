@@ -7,7 +7,7 @@ on:
 
 env:
   OPENVINO_BRANCH: 2021.2
-  VERSION: 2021.2.1
+  VERSION: 2021.2.2
 
 jobs:
   build_lnx:
@@ -87,6 +87,40 @@ jobs:
         name: "wheel_win_${{ matrix.python-version }}"
         path: "dist\\*.whl"
 
+  build_mo:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Clone OpenVINO
+        run: git clone --depth 1 -b ${{env.OPENVINO_BRANCH}} https://github.com/openvinotoolkit/openvino/
+      
+      - name: Build Wheel
+        run: |
+          mkdir wheel_mo && cd wheel_mo
+          mv ../openvino/model-optimizer model_optimizer
+          chmod +x model_optimizer/mo*.py
+
+          echo "import sys; import os; sys.path.append(os.path.dirname(__file__))" | tee -a model_optimizer/__init__.py
+
+          cp ../mo/MANIFEST.in ../mo/setup.py .
+
+          python3 -m pip install --upgrade pip
+          python3 -m pip install wheel setuptools
+          python3 setup.py sdist
+          python3 -m pip wheel --no-index --no-deps --wheel-dir dist dist/*.tar.gz
+
+      - name: Test
+        run: |
+          python3 -m pip install tensorflow==2.3.0 wheel_mo/dist/*.whl
+          wget -q https://github.com/petewarden/tf_ios_makefile_example/raw/master/data/tensorflow_inception_graph.pb
+          python3 mo/test.py
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: "wheel_mo"
+          path: "wheel_mo/dist/*.whl"
+
 
   test_ubuntu18:
     needs: build_lnx
@@ -153,7 +187,7 @@ jobs:
 
   publish:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    needs: [test_ubuntu18, test_debian10, test_ubuntu20, build_win]
+    needs: [test_ubuntu18, test_debian10, test_ubuntu20, build_win, build_mo]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/download-artifact@v2
