@@ -1,2 +1,2 @@
-include requirements_*.txt
+include model_optimizer/requirements_*.txt
 global-exclude *_test.py

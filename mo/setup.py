@@ -2,20 +2,18 @@
 
 import sys
 import os
-from fnmatch import fnmatch
+import re
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 
 if not 'VERSION' in os.environ:
     raise Exception('Set VERSION environment variable')
 
-# frameworks = []
-# for name in os.listdir('model_optimizer'):
-#     if fnmatch(name, 'mo_*.py'):
-#         print(name)
-# exit()
-# print(find_packages())
-# exit()
+requirements_txt = []
+for name in os.listdir('model_optimizer'):
+    match = re.match('requirements_(.*)\.txt', name)
+    if match:
+        requirements_txt.append(name)
 
 deps = [
     'networkx>=1.11',
@@ -29,20 +27,19 @@ with open('__init__.py', 'wt') as f:
 class InstallCmd(install):
     def run(self):
         install.run(self)
-        print(self.install_purelib)
-        # path = os.path.join(self.install_purelib, 'requirements_{}.txt'.format(framework))
-        # with open(path, 'wt') as f:
-        #     f.write('\n'.join(deps))
+        for name in requirements_txt:
+            path = os.path.join(self.install_purelib, 'model_optimizer', name)
+            with open(path, 'wt') as f:
+                f.write('\n'.join(deps))
 
 setup(name='experimental-openvino-python-mo',
         version=os.environ['VERSION'],
         author='Dmitry Kurtaev',
         url='https://github.com/dkurt/openvino-python-manylinux/',
         packages=find_packages(),
-        # py_modules=['mo_{}'.format(framework)],
-        # cmdclass={
-        #     'install': InstallCmd,
-        # },
+        cmdclass={
+            'install': InstallCmd,
+        },
         install_requires=deps,
         include_package_data=True,
 )

@@ -112,7 +112,7 @@ jobs:
 
       - name: Test
         run: |
-          python3 -m pip install wheel_mo/dist/*.whl
+          python3 -m pip install tensorflow==2.3.0 wheel_mo/dist/*.whl
           wget -q https://github.com/petewarden/tf_ios_makefile_example/raw/master/data/tensorflow_inception_graph.pb
           python3 mo/test.py
 
