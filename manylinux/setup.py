@@ -60,6 +60,7 @@ def normalize_lib_name(name):
 data = [ libs_dir + '/' + normalize_lib_name(name) for name in [
     'inference_engine_ir_reader',
     'inference_engine_onnx_reader',
+    'onnx_importer',
     'inference_engine_preproc',
     'inference_engine_legacy',
     'inference_engine_lp_transformations',

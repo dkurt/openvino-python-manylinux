@@ -7,7 +7,7 @@ on:
 
 env:
   OPENVINO_BRANCH: 2021.2
-  VERSION: 2021.2.2
+  VERSION: 2021.2.3
 
 jobs:
   build_lnx:

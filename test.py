@@ -49,6 +49,13 @@ download_file('https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_m
               'face-detection-adas-0001.xml',
               '62b4bf7dead77e16a47428b541aa4f3c506cdf3c7e31a317aa75771dd907557c')
 
+download_file('https://www.dropbox.com/s/065l4vr8bptzohb/resnet-34_kinetics.onnx?dl=1',
+              'resnet-34_kinetics.onnx',
+              'b3f49d3423267207050c9b6344baab19f68e716465041402643a4a75daaa69da')
+
 ie = IECore()
 net = ie.read_network('face-detection-adas-0001.xml', 'face-detection-adas-0001.bin')
+exec_net = ie.load_network(net, 'CPU')
+
+net = ie.read_network('resnet-34_kinetics.onnx')
 exec_net = ie.load_network(net, 'CPU')
